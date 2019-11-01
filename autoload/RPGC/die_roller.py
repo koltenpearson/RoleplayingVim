@@ -134,7 +134,6 @@ def die_converter(die):
 
     #split bonus from main die
     die_parts = get_bonus(die)
-    print(die_parts)
 
     die_results = {'add' : [], 'sub' : []}
     
@@ -159,7 +158,6 @@ def die_converter(die):
 
 #Get die data, retrun False if die infor is faulty
 die_data = die_converter(vim.current.line.strip())
-print(die_data)
 if not die_data:
     print_error()
 else:
