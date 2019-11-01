@@ -1,3 +1,9 @@
+DieDefine	RPGC.txt	/*DieDefine*
+GPL	RPGC.txt	/*GPL*
 RPGC.txt	RPGC.txt	/*RPGC.txt*
+RPGCContact	RPGC.txt	/*RPGCContact*
 RPGCContent	RPGC.txt	/*RPGCContent*
 RPGCDetails	RPGC.txt	/*RPGCDetails*
+RPGCDice	RPGC.txt	/*RPGCDice*
+RPGCFolding	RPGC.txt	/*RPGCFolding*
+RPGCStructure	RPGC.txt	/*RPGCStructure*

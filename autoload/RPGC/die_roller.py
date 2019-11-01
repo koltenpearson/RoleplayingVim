@@ -1,39 +1,67 @@
 import re
 import vim
-from numpy.random import randint
+from random import randint
 
 def print_error():
-    print """
+    print("""
     Something faulty, use proper die format\n
     Some examples:
         1d6
         1d20+1
         3d6-2
     Currently, only one die type is supported
-    """
+    """)
 
 
 def roll_dice(roll_data):
     total = 0
-    bonus = die_data['mod']
     for key in ['add','sub']:
-        for i in range (len(die_data[key])):
-            if not 'd' in die_data[key][i]: continue
+        for i in range (len(roll_data[key])):
             #All the fixed bonuses are placed in 'mod'
-                
-            n,d = die_data[key][i].strip().split('d')
-            if n == '':
-                n = 1
-            else:
-                n = int(n)
-            d = int(d)
-            for i in range (n):
-                print 'd{}: '.format(d),
-                res = randint(1,d+1)
-                total += res
-                print 'result={}, total={}'.format(res,total)
-    print '-'*10
-    print 'Total+bonus={}'.format(total+bonus)
+            raw = roll_data[key][i].strip()
+            if re.match("[0-9]*d[0-9]+",raw) :
+                n,d = raw.split('d')
+                if n == '':
+                    n = 1
+                else:
+                    n = int(n)
+                d = int(d)
+
+                text = []
+                if key == 'add' : 
+                    text.append(f'+{n if n != 1 else ""}d{d}(')
+                    for i in range (n):
+                        res = randint(1,d)
+                        total += res
+                        text.append(str(res))
+                        text.append(',')
+                    text.pop()
+                    text.append(f') = {total}')
+                    print(''.join(text))
+                elif key == 'sub' :
+                    text.append(f'-{n if n != 1 else ""}d{d}(')
+                    for i in range (n):
+                        res = randint(1,d)
+                        total -= res
+                        text.append(str(res))
+                        text.append(',')
+                    text.pop()
+                    text.append(f') = {total}')
+                    print(''.join(text))
+
+            elif re.match("[0-9]+", raw) :
+                if key == 'add' :
+                    total += int(raw)
+                    print(f'+{raw} = {total}')
+                elif key == 'sub' :
+                    total -= int(raw)
+                    print(f'-{raw} = {total}')
+
+
+
+
+    print('-'*10)
+    print(f'result = {total}')
             
     return
     
@@ -43,7 +71,7 @@ def get_bonus(die_string):
     """ A function to split a string based on + and - signs
     returns a dict with 'add' and 'sub' keys"""
 
-    out = {'add':[],'sub':[],'mod':0}
+    out = {'add':[],'sub':[]}
     
     target = 'add'
     while '+' in die_string or '-' in die_string:
@@ -69,7 +97,7 @@ def die_from_text(die_text):
     definition"""
 
     #Checking if this follows a regular die notation or a simple bonus
-    if re.match("[0-9]*d[0-9]*",die_text):
+    if re.match("[0-9]*d[0-9]+",die_text):
         return die_text
     elif re.match("[0-9]+",die_text):
         return die_text
@@ -102,39 +130,36 @@ def die_from_text(die_text):
 
 
 
-def die_converter():
-    die = vim.current.line.strip()
+def die_converter(die):
 
     #split bonus from main die
     die_parts = get_bonus(die)
+    print(die_parts)
+
+    die_results = {'add' : [], 'sub' : []}
     
     #replace predefined dies and bonuses with die notation
     for key in ['add','sub']:
         for i in range (len(die_parts[key])):
-            die_data = die_from_text(die_parts[key][i])
-            die_parts[key][i] = die_data
-            try: #Checking if this is a simple numerical value
-                #yes add it
-                die_data = int(die_data)
-                if key == 'add':
-                    die_parts['mod'] += die_data
-                else:
-                    die_parts['mod'] -= die_data
-            except ValueError:
-                #no, place it in the appropriate list
-                pass
-    return die_parts
-    
+            die_data = die_from_text(die_parts[key][i].strip())
 
-    
+            if die_data is None :
+                continue
 
-        
+            if '+' in die_data or '-' in die_data :
+                sub_die_data = die_converter(die_data)
+                die_results['add'].extend(sub_die_data['add'])
+                die_results['sub'].extend(sub_die_data['sub'])
+            else :
+                die_results[key].append(die_data)
 
+    return die_results
         
 
 
 #Get die data, retrun False if die infor is faulty
-die_data = die_converter()
+die_data = die_converter(vim.current.line.strip())
+print(die_data)
 if not die_data:
     print_error()
 else:
