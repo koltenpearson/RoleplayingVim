@@ -66,29 +66,30 @@ def roll_dice(roll_data):
     return
     
 
-def get_bonus(die_string):
+def parse_die(die_string):
 
     """ A function to split a string based on + and - signs
     returns a dict with 'add' and 'sub' keys"""
 
     out = {'add':[],'sub':[]}
+
+    tokens = re.split(r'([\-\+\s()])', die_string)
     
     target = 'add'
-    while '+' in die_string or '-' in die_string:
-        nextp = die_string.find('+')
-        nextm = die_string.find('-')
-
-        if nextp < nextm and nextp > 0 or nextm < 0:
-            to_put,die_string = die_string.split('+',1)
-            out[target].append(to_put)
+    for t in tokens :
+        if len(t.strip()) == 0 :
+            continue
+        elif t == '+' :
             target = 'add'
-
-        else:
-            to_put,die_string = die_string.split('-',1)
-            out[target].append(to_put)
+        elif t == '-' :
             target = 'sub'
+        elif re.match(r'[0-9]+', t) :
+            out[target].append(t)
+        elif re.match(r'[0-9]*d[0-9]+', t) :
+            out[target].append(t)
+        elif t.strip()[0] == '\\' :
+            out[target].append(t[1:])
 
-    out[target].append(die_string)        
     return out
 
 def die_from_text(die_text):
@@ -120,8 +121,9 @@ def die_from_text(die_text):
 
         
     for line in vim.current.buffer[lnum:]:
-        if die_text in line and '=' in line:
-            die_info=line.split('=')[1]
+        m = re.match(r'\s*'+re.escape(die_text)+'\s*=(.*)', line)  
+        if m :
+            die_info=m.group(1)
             #definition found, return it
             return die_info
         if n0>0 and re.match(pattern,line):
@@ -133,7 +135,8 @@ def die_from_text(die_text):
 def die_converter(die):
 
     #split bonus from main die
-    die_parts = get_bonus(die)
+    die_parts = parse_die(die)
+    print(die_parts)
 
     die_results = {'add' : [], 'sub' : []}
     
