@@ -124,7 +124,28 @@ def process(line, echo=False) :
 
     return total
 
-t = process(vim.current.line, echo=True)
-print('\n----------\n')
-print(f'total : {t}')
+if rpg_action == 'roll' :
+    t = process(vim.current.line, echo=True)
+    print('\n----------\n')
+    print(f'total : {t}')
+
+
+if rpg_action == 'lookup' : 
+    l,c = vim.current.window.cursor
+    l -= 1
+
+    line = vim.current.buffer[l]
+    parts = re.split(r'(\s|\+|\-|\(|\))', line)
+    current = 0
+    for p in parts :
+        c -= len(p)
+        if c < 0 :
+            try :
+                line = lookup(p)
+                process(line, echo=True)
+            except RollError :
+                print('no such variable')
+            break
+
+
 
