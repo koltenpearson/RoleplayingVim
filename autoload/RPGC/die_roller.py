@@ -2,7 +2,6 @@ import re
 import vim
 from random import randint
 
-
 class RollError(Exception) :
     pass
 
