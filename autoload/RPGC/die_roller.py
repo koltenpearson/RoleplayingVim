@@ -124,10 +124,22 @@ def process(line, echo=False) :
 
     return total
 
+
+
+if rpg_action == 'check' :
+    if 'd20' not in vim.current.line :
+        t = process(vim.current.line + '+ d20', echo=True)
+        print('\n----------\n')
+        print(f'total : {t}')
+    else :
+        rpg_action = 'roll'
+
 if rpg_action == 'roll' :
     t = process(vim.current.line, echo=True)
     print('\n----------\n')
     print(f'total : {t}')
+
+
 
 
 if rpg_action == 'lookup' : 

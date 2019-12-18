@@ -18,6 +18,15 @@ function! RPGC#running#lookup()
 
 endfunction
 
+function! RPGC#running#check()
+
+    "Running the python script
+    execute ':python3 rpg_action = "check"'
+    execute 'py3file ' . s:plugin_path . '/die_roller.py'
+
+endfunction
+
+
 function! RPGC#running#colsum()
 
     "Running the python script
